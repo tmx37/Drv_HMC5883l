@@ -5,8 +5,8 @@
  *      Author: tmx37
  */
 
-#include "DrvGY_HMC5883L_Cfg.h"
-#include "DrvGY_HMC5883L.h"
+#include "Drv_HMC5883L_Cfg.h"
+#include "Drv_HMC5883L.h"
 
 static DrvHMC5883L_Config_t mConfigData;
 

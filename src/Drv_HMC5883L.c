@@ -6,7 +6,7 @@
  */
 
  //#include "main.h"
-#include "HMC5883L.h"
+#include "Drv_HMC5883L.h"
 #include <stdint.h>
 
 /**
