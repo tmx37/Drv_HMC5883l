@@ -10,17 +10,56 @@
 
 static DrvHMC5883L_Config_t mConfigData;
 
-UtlGen_Err_t DrvHMC5883LCfg_Init()
-{
-    UtlGen_Err_t ErrCode;
-    mConfigData.I2CInst = 0;
-    mConfigData.pfWriteRegistersI2cCB = DrvI2c_WriteRegister;
-    mConfigData.pfReadRegistersI2cCB = DrvI2c_ReadRegister;
-    mConfigData.pfIsDeviceReadyI2cCB = DrvI2c_IsDeviceReady;
-    mConfigData.pfMasterTransmitI2cCB = DrvI2c_MasterTransmit;
-    mConfigData.pfMasterReveiceCB = DrvI2c_MasterReceive;
-    mConfigData.pfDelayCB = DrvI2c_Delay;
+uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+uint32_t MockIsDeviceReady(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials);
 
-    ErrCode = DrvHMC5883L_Init(&mConfigData);
-    return UTLGEN_OK;
+uint32_t MockMasterTransmitI2C(uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+uint32_t MockMasterReceiveI2C(uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+
+uint32_t MockDelay(uint32_t Delay);
+
+
+GenUtl_Err_t Drv_HMC5883LCfg_Init()
+{
+    GenUtl_Err_t ErrCode;
+    mConfigData.pfWriteRegistersI2cCB = MockWriteI2CReg;
+    mConfigData.pfReadRegistersI2cCB = MockReadI2CReg;
+    mConfigData.pfIsDeviceReadyI2cCB = MockIsDeviceReady;
+    mConfigData.pfMasterTransmitI2cCB = MockMasterTransmitI2C;
+    mConfigData.pfMasterReveiceCB = MockMasterReceiveI2C;
+    mConfigData.pfDelayCB = MockDelay;
+
+    ErrCode = Drv_HMC5883L_Init(&mConfigData);
+    return ErrCode;
+}
+
+uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+{
+    return OUT_OK;
+}
+
+uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+{
+    return OUT_OK;
+}
+
+uint32_t MockMasterTransmitI2C(uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size)
+{
+    return OUT_OK;
+}
+
+uint32_t MockMasterReceiveI2C(uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size)
+{
+    return OUT_OK;
+}
+
+uint32_t MockIsDeviceReady(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials)
+{
+    return OUT_OK;
+}
+
+uint32_t MockDelay(uint32_t Delay)
+{
+    (void)Delay;
 }

@@ -1,63 +1,40 @@
 /**
- * @file HMC5883L.h
- * @brief Driver interface for HMC5883L 3-Axis Digital Compass Module.
+ * @file DrvGY_HMC5883L.h
  *
- * Provides enums, configuration structures, and function prototypes for
- * initializing, configuring, and reading data from the HMC5883L magnetometer.
- *
- * @author iek
- * @date March 28, 2025
+ * @date 19/03/2025 
+ * @author tmx37
+ * 
+ * @brief 	Driver interface for HMC5883L 3-Axis Digital Compass Module.
+ * 		  	Provides enums, configuration structures, and function prototypes for
+ * 			initializing, configuring, and reading data from the HMC5883L magnetometer.
  */
 
-#ifndef INC_HMC5883L_H_
-#define INC_HMC5883L_H_
+#ifndef DRV_HMC5883L_INC_DRV_HMC5883L_H_
+#define DRV_HMC5883L_INC_DRV_HMC5883L_H_
 
-/**
- * @brief  HAL library include for STM32 platform.
- *
- * @note   The user must include the correct HAL header file based on their MCU family.
- *         For example:
- *         @code
- *         #include "stm32g0xx_hal.h"   // For STM32G0 series
- *         #include "stm32f4xx_hal.h"   // For STM32F4 series
- *         #include "stm32l4xx_hal.h"   // For STM32L4 series
- *         @endcode
- *         Make sure to match this include with your STM32 device.
- */
-#include "stm32g0xx_hal.h"
+#include "Drv_HMC5883L_Cfg.h"
 
-/**
- * @brief  I2C handle used for communication with the HMC5883L sensor.
- *
- * @note   The user must define the I2C handle according to the hardware setup.
- *         For example, if I2C1 is used:
- *         @code
- *         extern I2C_HandleTypeDef hi2c1;
- *         @endcode
- *         Replace 'hi2c1' with the appropriate I2C handle name used in your project.
- */
-extern I2C_HandleTypeDef hi2c1;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @brief  Internal pointer to the I2C handler used by the HMC5883L driver.
- *
- * @note   By default, this points to &hi2c1. If a different I2C instance is used
- *         (e.g., hi2c2 or hi2c3), update this pointer accordingly before using the driver.
- *
- *         Example:
- *         @code
- *         static I2C_HandleTypeDef *hmc_port = &hi2c2;
- *         @endcode
- */
-static I2C_HandleTypeDef *hmc_port = &hi2c1;
+typedef uint32_t (*Drv_HMC5883L_WriteRegisterCB_t) (uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef uint32_t (*Drv_HMC5883L_ReadRegisterCB_t) (uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef uint32_t (*Drv_HMC5883L_MasterTransmitCB_t) (uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+typedef uint32_t (*Drv_HMC5883L_MasterReceiveCB_t) (uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+typedef uint32_t (*Drv_HMC5883L_IsDeviceReadyCB_t) (uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials);
+typedef uint32_t (*Drv_HMC5883L_DelayCB_t) (uint32_t Delay);
 
-/// @brief Default configuration values
-#define HMC_DEFAULT_GAIN             HMC_GAIN_1090
-#define HMC_DEFAULT_MEASUREMENT_MODE HMC_SING_MEAS
-#define HMC_DEFAULT_AVERAGING        HMC_AVG_8_SAMPLE
-#define HMC_DEFAULT_DATARATE         HMC_DR_15_HZ
-#define HMC_DEFAULT_BIAS             HMC_BIAS_NORMAL
-
+typedef struct
+{
+	uint32_t I2CPort;
+    Drv_HMC5883L_WriteRegisterCB_t pfWriteRegistersI2cCB;
+    Drv_HMC5883L_ReadRegisterCB_t pfReadRegistersI2cCB;
+    Drv_HMC5883L_IsDeviceReadyCB_t pfIsDeviceReadyI2cCB;
+    Drv_HMC5883L_MasterTransmitCB_t pfMasterTransmitI2cCB;
+    Drv_HMC5883L_MasterReceiveCB_t pfMasterReveiceCB;
+    Drv_HMC5883L_DelayCB_t pfDelayCB;
+} DrvHMC5883L_Config_t;
 /**
  * @enum hmc_adr_t
  * @brief I2C address options for HMC5883L
@@ -160,6 +137,8 @@ typedef struct {
 	hmc_bias_t bias;                     ///< Bias configuration
 } hmc_t;
 
+GenUtl_Err_t Drv_HMC5883L_Init(const DrvHMC5883L_Config_t *pConfigData);
+
 /**
  * @brief Sends raw data to the specified register over I2C.
  */
@@ -220,6 +199,15 @@ void HMC_Read_All(hmc_t *compass);
  * @brief Verifies the identity of the HMC5883L device by checking ID registers.
  * @retval HAL_OK if ID matches, HAL_ERROR otherwise.
  */
-HAL_StatusTypeDef HMC5883L_Check_ID(void);
+GenUtl_Err_t HMC5883L_Check_ID(void);
 
-#endif /* INC_HMC5883L_H_ */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* DRV_HMC5883L_INC_DRVGY_HMC5883L_H_ */
+
+
+
+
+

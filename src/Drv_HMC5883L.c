@@ -1,13 +1,38 @@
-/**
- * @file    HMC5883L.c
+/*
+ * DrvGY_HMC5883L.c
  * @brief   Source file for the HMC5883L 3-Axis Digital Compass driver.
- * @date    Mar 28, 2025
- * @author  iek
+ *
+ *  Created on: Mar 19, 2025
+ *      Author: tmx37
  */
-
- //#include "main.h"
+#include "Drv_HMC5883L_Cfg.h"
 #include "Drv_HMC5883L.h"
-#include <stdint.h>
+
+uint32_t I2cPort = 0;
+
+static Drv_HMC5883L_DelayCB_t mDelayCB;
+static Drv_HMC5883L_WriteRegisterCB_t mWriteRegisterCB;
+static Drv_HMC5883L_ReadRegisterCB_t mReadRegisterCB;
+static Drv_HMC5883L_IsDeviceReadyCB_t mIsDeviceReadyCB;
+static Drv_HMC5883L_MasterTransmitCB_t mMasterTrasmitCB;
+static Drv_HMC5883L_MasterReceiveCB_t mMasterReceiveCB;
+
+GenUtl_Err_t Drv_HMC5883L_Init(const DrvHMC5883L_Config_t *pConfigData)
+{
+	I2cPort = pConfigData->I2CPort;
+    mDelayCB = pConfigData->pfDelayCB;
+    mWriteRegisterCB = pConfigData->pfWriteRegistersI2cCB;
+    mReadRegisterCB = pConfigData->pfReadRegistersI2cCB;
+    mIsDeviceReadyCB = pConfigData->pfIsDeviceReadyI2cCB;
+    mMasterTrasmitCB = pConfigData->pfMasterTransmitI2cCB;
+    mMasterReceiveCB = pConfigData->pfMasterReveiceCB;
+
+    // Device time to be ready for I2C commands
+    mDelayCB(260);
+
+    return OUT_OK;
+}
+
 
 /**
  * @brief  Sends data to a register on the HMC5883L via I2C.
@@ -17,27 +42,21 @@
  * @param hmc_data    Pointer to data buffer to send.
  * @param size        Number of bytes to write.
  */
-void HMC_SEND_DATA(hmc_adr_t address, hmc_reg_adr_t reg_address,
-		uint8_t *hmc_data, uint16_t size) {
-	HAL_I2C_Mem_Write(hmc_port, address, reg_address, I2C_MEMADD_SIZE_8BIT,
-			hmc_data, size, 100);
+void HMC_SEND_DATA(hmc_adr_t address, hmc_reg_adr_t reg_address, uint8_t *hmc_data, uint16_t size) 
+{
+	mWriteRegisterCB(I2cPort, address, reg_address, hmc_data, size);
 }
 
 /**
  * @brief  Reads magnetic field data from the X, Y, and Z axes.
  *
  * @param compass Pointer to an hmc_t structure to store the data.
- *
  * @note   Make sure a measurement has been triggered before calling this function.
- *
- * @see HMC_Make_Measurement_4_Single
- * @see HMC_Read_All
  */
-void HMC_Read_Compass(hmc_t *compass) {
+void HMC_Read_Compass(hmc_t *compass) 
+{
 	uint8_t data[6];
-	HAL_I2C_Mem_Read(hmc_port, HMC_READ_ADR, HMC_X_MSB, I2C_MEMADD_SIZE_8BIT,
-			data, 6, 100);
-
+	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_X_MSB, data, 6);
 	compass->compass_x = (int16_t) ((data[0] << 8) | data[1]);
 	compass->compass_y = (int16_t) ((data[2] << 8) | data[3]);
 	compass->compass_z = (int16_t) ((data[4] << 8) | data[5]);
@@ -47,14 +66,10 @@ void HMC_Read_Compass(hmc_t *compass) {
  * @brief  Reads the current measurement mode from the Mode register.
  *
  * @param compass Pointer to an hmc_t structure to update the mode field.
- *
- * @see HMC_Set_MEASUR_MODE
- * @see HMC_Read_All
  */
 void HMC_Read_MEASUR_MODE(hmc_t *compass) {
 	uint8_t hmc_data;
-	HAL_I2C_Mem_Read(hmc_port, HMC_READ_ADR, HMC_MODE_REG, I2C_MEMADD_SIZE_8BIT,
-			&hmc_data, 1, 100);
+	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_MODE_REG, &hmc_data, 1);
 	compass->mode = (hmc_measurement_mode_t) (hmc_data & 0x03);
 }
 
@@ -62,10 +77,6 @@ void HMC_Read_MEASUR_MODE(hmc_t *compass) {
  * @brief  Sets the measurement mode in the Mode register.
  *
  * @param mode Measurement mode to set (e.g. single, continuous).
- *
- * @see HMC_Read_MEASUR_MODE
- * @see HMC_Make_Measurement_4_Single
- * @see HMC5883L_Init
  */
 void HMC_Set_MEASUR_MODE(hmc_measurement_mode_t mode) {
 	uint8_t hmc_data = mode;
@@ -76,15 +87,10 @@ void HMC_Set_MEASUR_MODE(hmc_measurement_mode_t mode) {
  * @brief  Reads Configuration Register A and updates related fields in the struct.
  *
  * @param compass Pointer to an hmc_t structure to update averaging, datarate and bias.
- *
- * @see HMC_Set_Reg_A
- * @see HMC_Read_All
  */
 void HMC_Read_Reg_A(hmc_t *compass) {
 	uint8_t hmc_data;
-	HAL_I2C_Mem_Read(hmc_port, HMC_READ_ADR, HMC_CON_REG_A,
-			I2C_MEMADD_SIZE_8BIT, &hmc_data, 1, 100);
-
+	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_CON_REG_A, &hmc_data, 1);
 	compass->averaging = (hmc_avg_t) ((hmc_data >> 5) & 0x03);
 	compass->datarate = (hmc_datarate_t) ((hmc_data >> 2) & 0x07);
 	compass->bias = (hmc_bias_t) (hmc_data & 0x03);
@@ -96,33 +102,23 @@ void HMC_Read_Reg_A(hmc_t *compass) {
  * @param avg   Sample averaging setting.
  * @param dr    Output data rate setting.
  * @param bias  Measurement bias setting.
- *
- * @see HMC_Read_Reg_A
- * @see HMC5883L_Init
  */
 void HMC_Set_Reg_A(hmc_avg_t avg, hmc_datarate_t dr, hmc_bias_t bias) {
 	uint8_t hmc_data = 0;
-
 	hmc_data |= ((avg & 0x03) << 5);
 	hmc_data |= ((dr & 0x07) << 2);
 	hmc_data |= (bias & 0x03);
-
-	HAL_I2C_Mem_Write(hmc_port, HMC_READ_ADR, HMC_CON_REG_A,
-			I2C_MEMADD_SIZE_8BIT, &hmc_data, 1, 100);
+	mWriteRegisterCB(I2cPort, HMC_READ_ADR, HMC_CON_REG_A, &hmc_data, 1);
 }
 
 /**
  * @brief  Reads gain setting from Configuration Register B.
  *
  * @param compass Pointer to an hmc_t structure to update gain field.
- *
- * @see HMC_Set_Gain
- * @see HMC_Read_All
  */
 void HMC_Read_Gain(hmc_t *compass) {
 	uint8_t hmc_data;
-	HAL_I2C_Mem_Read(hmc_port, HMC_READ_ADR, HMC_CON_REG_B,
-			I2C_MEMADD_SIZE_8BIT, &hmc_data, 1, 100);
+	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_CON_REG_B, &hmc_data, 1);
 	compass->gain = (hmc_gain_t) (hmc_data & 0xE0);
 }
 
@@ -130,9 +126,6 @@ void HMC_Read_Gain(hmc_t *compass) {
  * @brief  Sets gain by writing to Configuration Register B.
  *
  * @param gain Gain setting to write.
- *
- * @see HMC_Read_Gain
- * @see HMC5883L_Init
  */
 void HMC_Set_Gain(hmc_gain_t gain) {
 	uint8_t hmc_data = gain;
@@ -143,9 +136,6 @@ void HMC_Set_Gain(hmc_gain_t gain) {
  * @brief  Triggers a single measurement (used in single measurement mode).
  *
  * @note This does not read any data, it only initiates measurement.
- *
- * @see HMC_Set_MEASUR_MODE
- * @see HMC_Read_Compass
  */
 void HMC_Make_Measurement_4_Single(void) {
 	HMC_Set_MEASUR_MODE(HMC_SING_MEAS);
@@ -155,10 +145,6 @@ void HMC_Make_Measurement_4_Single(void) {
  * @brief  Initializes the sensor with default configuration values.
  *
  * @note Uses defaults from HMC5883L.h (gain, averaging, datarate, bias, mode).
- *
- * @see HMC_Set_Reg_A
- * @see HMC_Set_Gain
- * @see HMC_Set_MEASUR_MODE
  */
 void HMC5883L_Init(void) {
 	HMC_Set_Reg_A(HMC_DEFAULT_AVERAGING, HMC_DEFAULT_DATARATE,
@@ -171,11 +157,6 @@ void HMC5883L_Init(void) {
  * @brief  Reads all sensor configuration and magnetic field values.
  *
  * @param compass Pointer to an hmc_t structure to store all values.
- *
- * @see HMC_Read_Compass
- * @see HMC_Read_Gain
- * @see HMC_Read_Reg_A
- * @see HMC_Read_MEASUR_MODE
  */
 void HMC_Read_All(hmc_t *compass) {
 	HMC_Read_Compass(compass);
@@ -189,18 +170,15 @@ void HMC_Read_All(hmc_t *compass) {
  *
  * @retval HAL_OK    If the ID matches (0x48, 0x34, 0x33)
  * @retval HAL_ERROR If the ID does not match or read fails.
- *
- * @see HMC5883L_Init
  */
-HAL_StatusTypeDef HMC5883L_Check_ID(void) {
+GenUtl_Err_t HMC5883L_Check_ID(void) {
 	uint8_t id[3];
 
-	if (HAL_I2C_Mem_Read(hmc_port, HMC_READ_ADR, 0x0A, I2C_MEMADD_SIZE_8BIT, id,
-			3, 100) != HAL_OK)
-		return HAL_ERROR;
+	if (mReadRegisterCB(I2cPort, HMC_READ_ADR, 0x0A, id,3) != OUT_OK)
+		return OUT_ERR_NOT_FOUND;
 
 	if (id[0] == 0x48 && id[1] == 0x34 && id[2] == 0x33)
-		return HAL_OK;
+		return OUT_OK;
 	else
-		return HAL_ERROR;
+		return OUT_ERR_INVALID_VERSION;
 }

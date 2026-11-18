@@ -8,10 +8,17 @@
 #ifndef DRVGY_HMC5883L_CFG_DRVGY_HMC5883L_CFG_H_
 #define DRVGY_HMC5883L_CFG_DRVGY_HMC5883L_CFG_H_
 
-#include "main.h"
-#include "DrvI2c.h"
-#include "UtlGen.h"
+#include "GenUtl.h"
+#include <stdint.h>
 
-UtlGen_Err_t DrvHMC5883LCfg_Init();
+/// @brief Default configuration values
+#define HMC_DEFAULT_GAIN             HMC_GAIN_1090
+#define HMC_DEFAULT_MEASUREMENT_MODE HMC_SING_MEAS
+#define HMC_DEFAULT_AVERAGING        HMC_AVG_8_SAMPLE
+#define HMC_DEFAULT_DATARATE         HMC_DR_15_HZ
+#define HMC_DEFAULT_BIAS             HMC_BIAS_NORMAL
+
+
+GenUtl_Err_t Drv_HMC5883LCfg_Init();
 
 #endif /* DRVGY_HMC5883L_CFG_DRVGY_HMC5883L_CFG_H_ */
