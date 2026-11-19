@@ -1,5 +1,5 @@
 /*
- * DrvGY_HMC5883L.c
+ * Drv_HMC5883L.c
  * @brief   Source file for the HMC5883L 3-Axis Digital Compass driver.
  *
  *  Created on: Mar 19, 2025
@@ -17,7 +17,7 @@ static Drv_HMC5883L_IsDeviceReadyCB_t mIsDeviceReadyCB;
 static Drv_HMC5883L_MasterTransmitCB_t mMasterTrasmitCB;
 static Drv_HMC5883L_MasterReceiveCB_t mMasterReceiveCB;
 
-GenUtl_Err_t Drv_HMC5883L_Init(const DrvHMC5883L_Config_t *pConfigData)
+GenUtl_Err_t Drv_HMC5883L_Init(const Drv_HMC5883L_Config_t *pConfigData)
 {
 	I2cPort = pConfigData->I2CPort;
     mDelayCB = pConfigData->pfDelayCB;

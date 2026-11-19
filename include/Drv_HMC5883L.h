@@ -1,5 +1,5 @@
 /**
- * @file DrvGY_HMC5883L.h
+ * @file Drv_HMC5883L.h
  *
  * @date 19/03/2025 
  * @author tmx37
@@ -34,7 +34,7 @@ typedef struct
     Drv_HMC5883L_MasterTransmitCB_t pfMasterTransmitI2cCB;
     Drv_HMC5883L_MasterReceiveCB_t pfMasterReveiceCB;
     Drv_HMC5883L_DelayCB_t pfDelayCB;
-} DrvHMC5883L_Config_t;
+} Drv_HMC5883L_Config_t;
 /**
  * @enum hmc_adr_t
  * @brief I2C address options for HMC5883L
@@ -137,7 +137,7 @@ typedef struct {
 	hmc_bias_t bias;                     ///< Bias configuration
 } hmc_t;
 
-GenUtl_Err_t Drv_HMC5883L_Init(const DrvHMC5883L_Config_t *pConfigData);
+GenUtl_Err_t Drv_HMC5883L_Init(const Drv_HMC5883L_Config_t *pConfigData);
 
 /**
  * @brief Sends raw data to the specified register over I2C.
@@ -205,7 +205,7 @@ GenUtl_Err_t HMC5883L_Check_ID(void);
 } /* extern "C" */
 #endif
 
-#endif /* DRV_HMC5883L_INC_DRVGY_HMC5883L_H_ */
+#endif /* DRV_HMC5883L_INC_DRV_HMC5883L_H_ */
 
 
 
