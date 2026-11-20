@@ -17,7 +17,7 @@ static Drv_HMC5883L_IsDeviceReadyCB_t mIsDeviceReadyCB;
 static Drv_HMC5883L_MasterTransmitCB_t mMasterTrasmitCB;
 static Drv_HMC5883L_MasterReceiveCB_t mMasterReceiveCB;
 
-GenUtl_Err_t Drv_HMC5883L_Init(const Drv_HMC5883L_Config_t *pConfigData)
+GenUtl_Err_t Drv_HMC5883L_Init(const Drv_HMC5883L_Cfg_t *pConfigData)
 {
 	I2cPort = pConfigData->I2CPort;
     mDelayCB = pConfigData->pfDelayCB;

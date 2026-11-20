@@ -8,7 +8,7 @@
 #include "Drv_HMC5883L_Cfg.h"
 #include "Drv_HMC5883L.h"
 
-static Drv_HMC5883L_Config_t mConfigData;
+static Drv_HMC5883L_Cfg_t mConfigData;
 
 uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
 uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
