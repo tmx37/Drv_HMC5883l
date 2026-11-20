@@ -18,12 +18,12 @@
 extern "C" {
 #endif
 
-typedef uint32_t (*Drv_HMC5883L_WriteRegisterCB_t) (uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
-typedef uint32_t (*Drv_HMC5883L_ReadRegisterCB_t) (uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
-typedef uint32_t (*Drv_HMC5883L_MasterTransmitCB_t) (uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
-typedef uint32_t (*Drv_HMC5883L_MasterReceiveCB_t) (uint32_t I2cInst, uint16_t DevAddress, uint8_t *pData, uint16_t Size);
-typedef uint32_t (*Drv_HMC5883L_IsDeviceReadyCB_t) (uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials);
-typedef uint32_t (*Drv_HMC5883L_DelayCB_t) (uint32_t Delay);
+typedef GenUtl_Err_t (*Drv_HMC5883L_WriteRegisterCB_t) (uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef GenUtl_Err_t (*Drv_HMC5883L_ReadRegisterCB_t) (uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef GenUtl_Err_t (*Drv_HMC5883L_MasterTransmitCB_t) (uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+typedef GenUtl_Err_t (*Drv_HMC5883L_MasterReceiveCB_t) (uint16_t DevAddress, uint8_t *pData, uint16_t Size);
+typedef GenUtl_Err_t (*Drv_HMC5883L_IsDeviceReadyCB_t) (uint8_t DevAddr, uint8_t nTrials);
+typedef void (*Drv_HMC5883L_DelayCB_t) (uint32_t Delay);
 
 typedef struct
 {

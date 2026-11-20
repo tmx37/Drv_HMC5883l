@@ -44,7 +44,7 @@ GenUtl_Err_t Drv_HMC5883L_Init(const Drv_HMC5883L_Cfg_t *pConfigData)
  */
 void HMC_SEND_DATA(hmc_adr_t address, hmc_reg_adr_t reg_address, uint8_t *hmc_data, uint16_t size) 
 {
-	mWriteRegisterCB(I2cPort, address, reg_address, hmc_data, size);
+	mWriteRegisterCB(address, reg_address, hmc_data, size);
 }
 
 /**
@@ -56,7 +56,7 @@ void HMC_SEND_DATA(hmc_adr_t address, hmc_reg_adr_t reg_address, uint8_t *hmc_da
 void HMC_Read_Compass(hmc_t *compass) 
 {
 	uint8_t data[6];
-	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_X_MSB, data, 6);
+	mReadRegisterCB(HMC_READ_ADR, HMC_X_MSB, data, 6);
 	compass->compass_x = (int16_t) ((data[0] << 8) | data[1]);
 	compass->compass_y = (int16_t) ((data[2] << 8) | data[3]);
 	compass->compass_z = (int16_t) ((data[4] << 8) | data[5]);
@@ -69,7 +69,7 @@ void HMC_Read_Compass(hmc_t *compass)
  */
 void HMC_Read_MEASUR_MODE(hmc_t *compass) {
 	uint8_t hmc_data;
-	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_MODE_REG, &hmc_data, 1);
+	mReadRegisterCB(HMC_READ_ADR, HMC_MODE_REG, &hmc_data, 1);
 	compass->mode = (hmc_measurement_mode_t) (hmc_data & 0x03);
 }
 
@@ -90,7 +90,7 @@ void HMC_Set_MEASUR_MODE(hmc_measurement_mode_t mode) {
  */
 void HMC_Read_Reg_A(hmc_t *compass) {
 	uint8_t hmc_data;
-	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_CON_REG_A, &hmc_data, 1);
+	mReadRegisterCB(HMC_READ_ADR, HMC_CON_REG_A, &hmc_data, 1);
 	compass->averaging = (hmc_avg_t) ((hmc_data >> 5) & 0x03);
 	compass->datarate = (hmc_datarate_t) ((hmc_data >> 2) & 0x07);
 	compass->bias = (hmc_bias_t) (hmc_data & 0x03);
@@ -108,7 +108,7 @@ void HMC_Set_Reg_A(hmc_avg_t avg, hmc_datarate_t dr, hmc_bias_t bias) {
 	hmc_data |= ((avg & 0x03) << 5);
 	hmc_data |= ((dr & 0x07) << 2);
 	hmc_data |= (bias & 0x03);
-	mWriteRegisterCB(I2cPort, HMC_READ_ADR, HMC_CON_REG_A, &hmc_data, 1);
+	mWriteRegisterCB(HMC_READ_ADR, HMC_CON_REG_A, &hmc_data, 1);
 }
 
 /**
@@ -118,7 +118,7 @@ void HMC_Set_Reg_A(hmc_avg_t avg, hmc_datarate_t dr, hmc_bias_t bias) {
  */
 void HMC_Read_Gain(hmc_t *compass) {
 	uint8_t hmc_data;
-	mReadRegisterCB(I2cPort, HMC_READ_ADR, HMC_CON_REG_B, &hmc_data, 1);
+	mReadRegisterCB(HMC_READ_ADR, HMC_CON_REG_B, &hmc_data, 1);
 	compass->gain = (hmc_gain_t) (hmc_data & 0xE0);
 }
 
@@ -174,7 +174,7 @@ void HMC_Read_All(hmc_t *compass) {
 GenUtl_Err_t HMC5883L_Check_ID(void) {
 	uint8_t id[3];
 
-	if (mReadRegisterCB(I2cPort, HMC_READ_ADR, 0x0A, id,3) != OUT_OK)
+	if (mReadRegisterCB(HMC_READ_ADR, 0x0A, id,3) != OUT_OK)
 		return OUT_ERR_NOT_FOUND;
 
 	if (id[0] == 0x48 && id[1] == 0x34 && id[2] == 0x33)
